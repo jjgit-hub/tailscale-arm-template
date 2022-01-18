@@ -1,0 +1,9 @@
+{
+  "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
+  "type": "QuickStart",
+  "itemDisplayName": "Azure Portal Tailscale",
+  "description": "Create Azure gateway for tailscale",
+  "summary": "Create Azure gateway for tailscale",
+  "githubUsername": "jjohnston-cpacket",
+  "dateUpdated": "2022-01-17"
+}

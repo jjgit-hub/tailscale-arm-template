@@ -1,0 +1,238 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1008.15138",
+      "templateHash": "115330855922303450"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location for the resources."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "metadata": {
+        "description": "Type of authentication to use on the Virtual Machine."
+      },
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ]
+    },
+    "adminPasswordOrKey": {
+      "type": "secureString",
+      "metadata": {
+        "description": "Password or ssh key for the Virtual Machine."
+      }
+    },
+    "virtualNetwork": {
+      "type": "object",
+      "metadata": {
+        "description": "virtualNetwork properties from VirtualNetworkCombo"
+      }
+    },
+    "vmSizeSelector": {
+      "type": "string",
+      "metadata": {
+        "description": "tailscale VM size choice"
+      }
+    },
+    "tsVmName": {
+      "type": "string",
+      "metadata": {
+        "description": "tailscale VM Name"
+      }
+    },
+    "tsPreAuthKey": {
+      "type": "string",
+      "metadata": {
+        "description": "tailscale Pre-Auth Key"
+      }
+    },
+    "tsRoutedSubnets": {
+      "type": "string",
+      "metadata": {
+        "description": "tailscale Routed Subnets"
+      }
+    },
+    "tagsByResource": {
+      "type": "object",
+      "metadata": {
+        "description": "tags from TagsByResource"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "cloudInit": "I2Nsb3VkLWNvbmZpZzoKcGFja2FnZV91cGRhdGU6IHRydWUKcGFja2FnZV91cGdyYWRlOiB0cnVlCgphcHQ6CiAgcHJlc2VydmVfc291cmNlc19saXN0OiB0cnVlCiAgc291cmNlczoKICAgIHRhaWxzY2FsZS5saXN0OgogICAgICBzb3VyY2U6ICJkZWIgaHR0cHM6Ly9wa2dzLnRhaWxzY2FsZS5jb20vc3RhYmxlL3VidW50dSBmb2NhbCBtYWluIgogICAgICBrZXlpZDogMjU5NkE5OUVBQUIzMzgyMTg5M0MwQTc5NDU4Q0E4MzI5NTdGNTg2OAoKcGFja2FnZXM6IAogIC0gdGFpbHNjYWxlCgpydW5jbWQ6CiAgIyBpcCBmb3J3YXJkaW5nIG11c3QgYmUgZW5hYmxlZCB0byBhY3QgYXMgYSBnYXRld2F5CiAgLSBlY2hvICduZXQuaXB2NC5pcF9mb3J3YXJkID0gMScgfCB0ZWUgLWEgL2V0Yy9zeXNjdGwuY29uZgogIC0gZWNobyAnbmV0LmlwdjYuY29uZi5hbGwuZm9yd2FyZGluZyA9IDEnIHwgdGVlIC1hIC9ldGMvc3lzY3RsLmNvbmYKICAtIHN5c2N0bCAtcCAvZXRjL3N5c2N0bC5jb25mCiAgLSB0YWlsc2NhbGUgdXAgLS1hdXRoa2V5IHswfSAgLS1hZHZlcnRpc2Utcm91dGVzPXsxfQ==",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[format('/home/{0}/.ssh/authorized_keys', parameters('adminUsername'))]",
+            "keyData": "[parameters('adminPasswordOrKey')]"
+          }
+        ]
+      }
+    },
+    "tssubnetId": "[if(equals(parameters('virtualNetwork').newOrExisting, 'new'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetwork').name, parameters('virtualNetwork').subnets.tsSubnet.name), resourceId(parameters('virtualNetwork').resourceGroup, 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetwork').name, parameters('virtualNetwork').subnets.tsSubnet.name))]"
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('virtualNetwork').newOrExisting, 'new')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('virtualNetwork').name]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": "[parameters('virtualNetwork').addressPrefixes]"
+        }
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], null())]"
+    },
+    {
+      "condition": "[equals(parameters('virtualNetwork').newOrExisting, 'new')]",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2020-11-01",
+      "name": "[format('{0}/{1}', parameters('virtualNetwork').name, parameters('virtualNetwork').subnets.tsSubnet.name)]",
+      "properties": {
+        "addressPrefix": "[parameters('virtualNetwork').subnets.tsSubnet.addressPrefix]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork').name)]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-11-01",
+      "name": "[format('{0}-nsg', parameters('tsVmName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Block SSH",
+            "properties": {
+              "priority": 100,
+              "protocol": "Tcp",
+              "access": "Deny",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          }
+        ]
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], null())]"
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-11-01",
+      "name": "[format('{0}-pip', parameters('tsVmName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "zones": [
+        "1"
+      ],
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('tsVmName')]"
+        }
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIpAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIpAddresses'], null())]"
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-11-01",
+      "name": "[format('{0}-nic', parameters('tsVmName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[format('{0}-ipconfig', parameters('tsVmName'))]",
+            "properties": {
+              "subnet": {
+                "id": "[variables('tssubnetId')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('tsVmName')))]"
+              }
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": true
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], null())]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('tsVmName')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetwork').name, parameters('virtualNetwork').subnets.tsSubnet.name)]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2020-12-01",
+      "name": "[parameters('tsVmName')]",
+      "location": "[parameters('location')]",
+      "zones": [
+        "1"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSizeSelector')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "name": "[format('{0}-osDisk', parameters('tsVmName'))]"
+          },
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('tsVmName')))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('tsVmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), null(), variables('linuxConfiguration'))]",
+          "customData": "[format(variables('cloudInit'), parameters('tsPreAuthKey'), parameters('tsRoutedSubnets'))]"
+        }
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], null())]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('tsVmName')))]"
+      ]
+    }
+  ]
+}
