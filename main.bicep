@@ -134,7 +134,7 @@ resource tsnic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
         }
       }
     ]
-    enableAcceleratedNetworking: true
+    enableAcceleratedNetworking: false
   }
   tags: contains(tagsByResource, 'Microsoft.Network/networkInterfaces') ? tagsByResource['Microsoft.Network/networkInterfaces'] : null
 }
