@@ -29,9 +29,7 @@ param tsVmName string
 param tsPreAuthKey string
 
 @description('tailscale Routed Subnets')
-param tsRoutedSubnets string
-
-// var routedSubnets = length(tsRoutedSubnets) > 0 ? tsRoutedSubnets : ''
+param tsRoutedSubnets string = ''
 
 @description('tags from TagsByResource')
 param tagsByResource object

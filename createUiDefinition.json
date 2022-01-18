@@ -150,11 +150,7 @@
                         "name": "tsRoutedSubnets",
                         "type": "Microsoft.Common.TextBox",
                         "label": "tailscale Routed Subnets",
-                        "toolTip": "The list of the subnets routed through this tailscale gateway or blank for none. Ex. 192.168.0.0/24,10.0.34.0/24",
-                        "defaultValue": "",
-                        "constraints": {
-                            "required": false
-                        }
+                        "toolTip": "The list of the subnets routed through this tailscale gateway or blank for none. Ex. 192.168.0.0/24,10.0.34.0/24"
                     }
                 ]
             },

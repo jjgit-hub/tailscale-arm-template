@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "115330855922303450"
+      "templateHash": "4589329964901963872"
     }
   },
   "parameters": {
@@ -63,6 +63,7 @@
     },
     "tsRoutedSubnets": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "tailscale Routed Subnets"
       }
