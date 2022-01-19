@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "16662581397564546575"
+      "templateHash": "9628568613252625374"
     }
   },
   "parameters": {
@@ -117,30 +117,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork').name)]"
       ]
-    },
-    {
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
-      "name": "[format('{0}-nsg', parameters('tsVmName'))]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "SSH",
-            "properties": {
-              "priority": 100,
-              "protocol": "Tcp",
-              "access": "Deny",
-              "direction": "Inbound",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "22"
-            }
-          }
-        ]
-      },
-      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], null())]"
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",

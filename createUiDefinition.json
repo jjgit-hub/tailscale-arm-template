@@ -164,7 +164,6 @@
                         "resources": [
                             "Microsoft.Network/virtualNetworks",
                             "Microsoft.Network/networkInterfaces",
-                            "Microsoft.Network/networkSecurityGroups",
                             "Microsoft.Network/publicIpAddresses",
                             "Microsoft.Storage/storageAccounts",
                             "Microsoft.Compute/virtualMachines"

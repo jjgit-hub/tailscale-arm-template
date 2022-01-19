@@ -71,29 +71,6 @@ resource tssubnet 'Microsoft.Network/virtualNetworks/subnets@2020-11-01' = if (v
   }
 }
 
-resource tsnsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: '${tsVmName}-nsg'
-  location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'SSH'
-        properties: {
-          priority: 100
-          protocol: 'Tcp'
-          access: 'Deny'
-          direction: 'Inbound'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '22'
-        }
-      }
-    ]
-  }
-  tags: contains(tagsByResource, 'Microsoft.Network/networkSecurityGroups') ? tagsByResource['Microsoft.Network/networkSecurityGroups'] : null
-}
-
 /*
   tailscale gateway
 */
@@ -175,30 +152,3 @@ resource tsvm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   }
   tags: contains(tagsByResource, 'Microsoft.Compute/virtualMachines') ? tagsByResource['Microsoft.Compute/virtualMachines'] : null
 }
-
-/*
-
-# cloud-init
-users:
-  - default
-  - name: {0}
-    groups: sudo {1}
-    shell: {2}
-
-var values = {
-  username: 'mikael'
-  groups: ''
-  shell: '/bin/bash'
-}
-
-var cloudInit = loadContentAsBase64('user-data.template.yml')
-
-resource my_vm 'Microsoft.Compute/virtualMachine' = {
-  properties: {
-    osProfile: {
-      customData: format(cloudInit, values[0], values[1], values[2])
-    }
-  }
-}
-
-*/
