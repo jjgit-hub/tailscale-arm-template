@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "7461101638689026661"
+      "templateHash": "11777848396446449570"
     }
   },
   "parameters": {
@@ -77,7 +77,8 @@
   },
   "functions": [],
   "variables": {
-    "cloudInit": "I2Nsb3VkLWNvbmZpZzoKcGFja2FnZV91cGRhdGU6IHRydWUKcGFja2FnZV91cGdyYWRlOiB0cnVlCgphcHQ6CiAgcHJlc2VydmVfc291cmNlc19saXN0OiB0cnVlCiAgc291cmNlczoKICAgIHRhaWxzY2FsZS5saXN0OgogICAgICBzb3VyY2U6ICJkZWIgaHR0cHM6Ly9wa2dzLnRhaWxzY2FsZS5jb20vc3RhYmxlL3VidW50dSBmb2NhbCBtYWluIgogICAgICBrZXlpZDogMjU5NkE5OUVBQUIzMzgyMTg5M0MwQTc5NDU4Q0E4MzI5NTdGNTg2OAoKcGFja2FnZXM6IAogIC0gdGFpbHNjYWxlCgpydW5jbWQ6CiAgIyBpcCBmb3J3YXJkaW5nIG11c3QgYmUgZW5hYmxlZCB0byBhY3QgYXMgYSBnYXRld2F5CiAgLSBlY2hvICduZXQuaXB2NC5pcF9mb3J3YXJkID0gMScgfCB0ZWUgLWEgL2V0Yy9zeXNjdGwuY29uZgogIC0gZWNobyAnbmV0LmlwdjYuY29uZi5hbGwuZm9yd2FyZGluZyA9IDEnIHwgdGVlIC1hIC9ldGMvc3lzY3RsLmNvbmYKICAtIHN5c2N0bCAtcCAvZXRjL3N5c2N0bC5jb25mCiAgLSB0YWlsc2NhbGUgdXAgLS1hdXRoa2V5IHswfSAgLS1hZHZlcnRpc2Utcm91dGVzPXsxfQ==",
+    "routedsubnets": "[if(greater(length(parameters('tsRoutedSubnets')), 0), format('--advertise-routes={0}', parameters('tsRoutedSubnets')), ' ')]",
+    "cloudInit": "I2Nsb3VkLWNvbmZpZzoKcGFja2FnZV91cGRhdGU6IHRydWUKcGFja2FnZV91cGdyYWRlOiB0cnVlCgphcHQ6CiAgcHJlc2VydmVfc291cmNlc19saXN0OiB0cnVlCiAgc291cmNlczoKICAgIHRhaWxzY2FsZS5saXN0OgogICAgICBzb3VyY2U6ICJkZWIgaHR0cHM6Ly9wa2dzLnRhaWxzY2FsZS5jb20vc3RhYmxlL3VidW50dSBmb2NhbCBtYWluIgogICAgICBrZXlpZDogMjU5NkE5OUVBQUIzMzgyMTg5M0MwQTc5NDU4Q0E4MzI5NTdGNTg2OAoKcGFja2FnZXM6IAogIC0gdGFpbHNjYWxlCgpydW5jbWQ6CiAgIyBpcCBmb3J3YXJkaW5nIG11c3QgYmUgZW5hYmxlZCB0byBhY3QgYXMgYSBnYXRld2F5CiAgLSBlY2hvICduZXQuaXB2NC5pcF9mb3J3YXJkID0gMScgfCB0ZWUgLWEgL2V0Yy9zeXNjdGwuY29uZgogIC0gZWNobyAnbmV0LmlwdjYuY29uZi5hbGwuZm9yd2FyZGluZyA9IDEnIHwgdGVlIC1hIC9ldGMvc3lzY3RsLmNvbmYKICAtIHN5c2N0bCAtcCAvZXRjL3N5c2N0bC5jb25mCiAgLSB0YWlsc2NhbGUgdXAgLS1hdXRoa2V5IHswfSAgezF9",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -125,7 +126,7 @@
       "properties": {
         "securityRules": [
           {
-            "name": "Block SSH",
+            "name": "SSH",
             "properties": {
               "priority": 100,
               "protocol": "Tcp",
@@ -149,9 +150,6 @@
       "sku": {
         "name": "Standard"
       },
-      "zones": [
-        "1"
-      ],
       "properties": {
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
@@ -193,9 +191,6 @@
       "apiVersion": "2020-12-01",
       "name": "[parameters('tsVmName')]",
       "location": "[parameters('location')]",
-      "zones": [
-        "1"
-      ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSizeSelector')]"
@@ -227,7 +222,7 @@
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPasswordOrKey')]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), null(), variables('linuxConfiguration'))]",
-          "customData": "[format(variables('cloudInit'), parameters('tsPreAuthKey'), parameters('tsRoutedSubnets'))]"
+          "customData": "[format(variables('cloudInit'), parameters('tsPreAuthKey'), variables('routedsubnets'))]"
         }
       },
       "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], null())]",
