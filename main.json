@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "11870073695657558516"
+      "templateHash": "16662581397564546575"
     }
   },
   "parameters": {
@@ -77,8 +77,8 @@
   },
   "functions": [],
   "variables": {
-    "routedsubnets": "[if(greater(length(parameters('tsRoutedSubnets')), 0), format('--advertise-routes={0}', parameters('tsRoutedSubnets')), '')]",
-    "cloudInit": "I2Nsb3VkLWNvbmZpZzoKcGFja2FnZV91cGRhdGU6IHRydWUKcGFja2FnZV91cGdyYWRlOiB0cnVlCgphcHQ6CiAgcHJlc2VydmVfc291cmNlc19saXN0OiB0cnVlCiAgc291cmNlczoKICAgIHRhaWxzY2FsZS5saXN0OgogICAgICBzb3VyY2U6ICJkZWIgaHR0cHM6Ly9wa2dzLnRhaWxzY2FsZS5jb20vc3RhYmxlL3VidW50dSBmb2NhbCBtYWluIgogICAgICBrZXlpZDogMjU5NkE5OUVBQUIzMzgyMTg5M0MwQTc5NDU4Q0E4MzI5NTdGNTg2OAoKcGFja2FnZXM6IAogIC0gdGFpbHNjYWxlCgpydW5jbWQ6CiAgIyBpcCBmb3J3YXJkaW5nIG11c3QgYmUgZW5hYmxlZCB0byBhY3QgYXMgYSBnYXRld2F5CiAgLSBlY2hvICduZXQuaXB2NC5pcF9mb3J3YXJkID0gMScgfCB0ZWUgLWEgL2V0Yy9zeXNjdGwuY29uZgogIC0gZWNobyAnbmV0LmlwdjYuY29uZi5hbGwuZm9yd2FyZGluZyA9IDEnIHwgdGVlIC1hIC9ldGMvc3lzY3RsLmNvbmYKICAtIHN5c2N0bCAtcCAvZXRjL3N5c2N0bC5jb25mCiAgLSBlY2hvICdkZWJ1ZyB7MH0gezF9JyB8IHRlZSAtYSAvdmFyL2xvZy9kZWJ1Zy50eHQKICAjIC0gdGFpbHNjYWxlIHVwIC0tYXV0aGtleSB7MH0=",
+    "routedsubnets": "[if(empty(parameters('tsRoutedSubnets')), '', format('--advertise-routes={0}', parameters('tsRoutedSubnets')))]",
+    "cloudInitTemplate": "[format('#cloud-config:\npackage_update: true\npackage_upgrade: true\n\napt:\n  preserve_sources_list: true\n  sources:\n    tailscale.list:\n      source: \"deb https://pkgs.tailscale.com/stable/ubuntu focal main\"\n      keyid: 2596A99EAAB33821893C0A79458CA832957F5868\n\npackages: \n  - tailscale\n\nruncmd:\n  # ip forwarding must be enabled to act as a gateway\n  - echo ''net.ipv4.ip_forward = 1'' | tee -a /etc/sysctl.conf\n  - echo ''net.ipv6.conf.all.forwarding = 1'' | tee -a /etc/sysctl.conf\n  - sysctl -p /etc/sysctl.conf\n  - tailscale up --authkey {0} {1}', parameters('tsPreAuthKey'), variables('routedsubnets'))]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -222,7 +222,7 @@
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPasswordOrKey')]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), null(), variables('linuxConfiguration'))]",
-          "customData": "[format(variables('cloudInit'), parameters('tsPreAuthKey'), variables('routedsubnets'))]"
+          "customData": "[base64(variables('cloudInitTemplate'))]"
         }
       },
       "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], null())]",

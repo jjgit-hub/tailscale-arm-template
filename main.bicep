@@ -30,12 +30,11 @@ param tsPreAuthKey string
 
 @description('tailscale Routed Subnets')
 param tsRoutedSubnets string = ''
-var routedsubnets = length(tsRoutedSubnets) > 0 ? '--advertise-routes=${tsRoutedSubnets}' : ''
+var routedsubnets = empty(tsRoutedSubnets) ? '' : '--advertise-routes=${tsRoutedSubnets}'
+var cloudInitTemplate = format(loadTextContent('cloud-init.template.yml'), tsPreAuthKey, routedsubnets)
 
 @description('tags from TagsByResource')
 param tagsByResource object
-
-var cloudInit = loadFileAsBase64('cloud-init.template.yml')
 
 var linuxConfiguration = {
   disablePasswordAuthentication: true
@@ -171,7 +170,7 @@ resource tsvm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
       adminUsername: adminUsername
       adminPassword: adminPasswordOrKey
       linuxConfiguration: any(authenticationType == 'password' ? null : linuxConfiguration) // TODO: workaround for https://github.com/Azure/bicep/issues/449
-      customData: format(cloudInit, tsPreAuthKey, routedsubnets)
+      customData: base64(cloudInitTemplate)
     }
   }
   tags: contains(tagsByResource, 'Microsoft.Compute/virtualMachines') ? tagsByResource['Microsoft.Compute/virtualMachines'] : null
