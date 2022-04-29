@@ -136,13 +136,19 @@
                     },
                     {
                         "name": "tsPreAuthKey",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "tailscale Pre-Auth Key",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                          "password": "tailscale Pre-Auth Key",
+                          "confirmPassword": "Confirm password"
+                        },
                         "toolTip": "The tailscale Pre-Auth Key. Auth key page https://login.tailscale.com/admin/authkeys",
-                        "defaultValue": "",
                         "constraints": {
-                            "required": true
-                        }
+                          "required": false
+                        },
+                        "options": {
+                          "hideConfirmation": true
+                        },
+                        "visible": true
                     },
                     {
                         "name": "tsRoutedSubnets",
