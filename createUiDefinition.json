@@ -29,9 +29,7 @@
                     "sshPublicKey": "SSH Public Key for the Virtual Machines"
                 },
                 "constraints": {
-                  "required": true,
-                  "customPasswordRegex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
-                  "customValidationMessage": "The password must be alphanumeric, contain at least 12 characters, and have at least 1 letter and 1 number."
+                  "required": true
                 },
                 "options": {
                   "hideConfirmation": false,
