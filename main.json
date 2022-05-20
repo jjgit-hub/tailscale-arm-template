@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.1008.15138",
-      "templateHash": "9628568613252625374"
+      "version": "0.6.18.56646",
+      "templateHash": "15790703733326829594"
     }
   },
   "parameters": {
@@ -75,10 +75,10 @@
       }
     }
   },
-  "functions": [],
   "variables": {
+    "$fxv#0": "#cloud-config:\npackage_update: true\npackage_upgrade: true\n\napt:\n  preserve_sources_list: true\n  sources:\n    tailscale.list:\n      source: \"deb https://pkgs.tailscale.com/stable/ubuntu focal main\"\n      keyid: 2596A99EAAB33821893C0A79458CA832957F5868\n\npackages: \n  - tailscale\n\nruncmd:\n  # ip forwarding must be enabled to act as a gateway\n  - echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf\n  - echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf\n  - sysctl -p /etc/sysctl.conf\n  - tailscale up --authkey {0} {1}",
     "routedsubnets": "[if(empty(parameters('tsRoutedSubnets')), '', format('--advertise-routes={0}', parameters('tsRoutedSubnets')))]",
-    "cloudInitTemplate": "[format('#cloud-config:\npackage_update: true\npackage_upgrade: true\n\napt:\n  preserve_sources_list: true\n  sources:\n    tailscale.list:\n      source: \"deb https://pkgs.tailscale.com/stable/ubuntu focal main\"\n      keyid: 2596A99EAAB33821893C0A79458CA832957F5868\n\npackages: \n  - tailscale\n\nruncmd:\n  # ip forwarding must be enabled to act as a gateway\n  - echo ''net.ipv4.ip_forward = 1'' | tee -a /etc/sysctl.conf\n  - echo ''net.ipv6.conf.all.forwarding = 1'' | tee -a /etc/sysctl.conf\n  - sysctl -p /etc/sysctl.conf\n  - tailscale up --authkey {0} {1}', parameters('tsPreAuthKey'), variables('routedsubnets'))]",
+    "cloudInitTemplate": "[format(variables('$fxv#0'), parameters('tsPreAuthKey'), variables('routedsubnets'))]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -127,10 +127,7 @@
         "name": "Standard"
       },
       "properties": {
-        "publicIPAllocationMethod": "Static",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('tsVmName')]"
-        }
+        "publicIPAllocationMethod": "Static"
       },
       "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIpAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIpAddresses'], null())]"
     },
@@ -180,9 +177,9 @@
             "name": "[format('{0}-osDisk', parameters('tsVmName'))]"
           },
           "imageReference": {
+            "offer": "0001-com-ubuntu-server-focal",
             "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "18.04-LTS",
+            "sku": "20_04-lts",
             "version": "latest"
           }
         },

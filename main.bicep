@@ -83,9 +83,6 @@ resource tspip 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   }
   properties: {
     publicIPAllocationMethod: 'Static'
-    dnsSettings: {
-      domainNameLabel: tsVmName
-    }
   }
   tags: contains(tagsByResource, 'Microsoft.Network/publicIpAddresses') ? tagsByResource['Microsoft.Network/publicIpAddresses'] : null
 }
@@ -129,9 +126,9 @@ resource tsvm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
         name: '${tsVmName}-osDisk'
       }
       imageReference: {
+        offer: '0001-com-ubuntu-server-focal'
         publisher: 'Canonical'
-        offer: 'UbuntuServer'
-        sku: '18.04-LTS'
+        sku: '20_04-lts'
         version: 'latest'
       }
     }
