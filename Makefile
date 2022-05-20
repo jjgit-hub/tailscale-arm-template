@@ -3,7 +3,7 @@
 build: build-bicep
 
 build-bicep:
-	bicep build main.bicep
+	az bicep build --file main.bicep
 
 tag-latest:
 	# create a git lightweight tag for lastest release
